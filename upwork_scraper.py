@@ -52,7 +52,7 @@ def scrape_freelancers_data():
             "Country": country.text.strip(),
             "Hourly Rate": hourly_rate.text.strip(),
             "Total Earned": total_earned.text.strip(),
-            "Job Success Score": job_success_score.text.strip(),
+            "Job Success Score": job_success_score.text.strip().replace('\n', '').replace('            ', ''),
             "Badge": badge.text.strip(),
             "Bio": bio.text.strip(),
             "Company Name": company_name.text.strip(),
