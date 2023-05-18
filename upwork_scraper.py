@@ -24,10 +24,12 @@ def scrape_freelancers_data():
     company_names = soup.find_all('div', {'class': 'd-flex align-items-center up-btn-link'})  # company_name
     company_earns = soup.find_all('div', {'class': 'ml-10 agency-box-stats'})  # company_earn
     raw_htmls = soup.find_all('div', {'class': 'up-card-section up-card-hover'})  # raw_html
+    company_links = soup.find_all(
+        'div', {'class': 'cfe-ui-freelancer-tile-agency-box-legacy mt-5 mt-10 agency-box-legacy--link'})
 
     freelancers_data = []
 
-    for name, role, profile_link, country, hourly_rate, total_earned, job_success_score, badge, bio, company_name, company_earn, raw_html in zip(names, roles, profile_links, countries, hourly_rates, total_earneds, job_success_scores, badges, bios, company_names, company_earns, raw_htmls):
+    for name, role, profile_link, country, hourly_rate, total_earned, job_success_score, badge, bio, company_name, company_earn, raw_html, company_link in zip(names, roles, profile_links, countries, hourly_rates, total_earneds, job_success_scores, badges, bios, company_names, company_earns, raw_htmls, company_links):
 
         split_data = str(profile_link).split()
         sliced_data = split_data[9:10]
@@ -36,10 +38,17 @@ def scrape_freelancers_data():
         final = final.replace('"', '')
         joined_final = 'https://www.upwork.com/freelancers/' + final
 
+        split_data = str(company_link).split()
+        sliced_data = split_data[5:6]
+        split_sliced_data = sliced_data[0].split('=')
+        sliced_split_sliced_data = split_sliced_data[1:]
+        cleaned_data = sliced_split_sliced_data[0].strip('[]').strip('"')
+        company_link_final = 'https://www.upwork.com/agencies/' + cleaned_data
+
         freelancer_data = {
             "Name": name.text.strip(),
             "Role": role.text.strip(),
-            "Profile Link": joined_final,  # Modified field name to "Profile Link"
+            "Profile Link": joined_final,
             "Country": country.text.strip(),
             "Hourly Rate": hourly_rate.text.strip(),
             "Total Earned": total_earned.text.strip(),
@@ -48,7 +57,8 @@ def scrape_freelancers_data():
             "Bio": bio.text.strip(),
             "Company Name": company_name.text.strip(),
             "Company Earn": company_earn.text.strip(),
-            "Raw HTML": raw_html.prettify()
+            "Raw HTML": raw_html.prettify(),
+            "company links": company_link_final
         }
         freelancers_data.append(freelancer_data)
 
