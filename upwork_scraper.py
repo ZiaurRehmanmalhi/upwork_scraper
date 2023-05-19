@@ -2,6 +2,7 @@ import time
 import csv
 from bs4 import BeautifulSoup
 from selenium import webdriver
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -14,6 +15,7 @@ driver.get(URL)
 time.sleep(15)
 driver.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
 time.sleep(5)
+
 while True:
     last_scroll_height = driver.execute_script("return document.documentElement.scrollHeight")
     driver.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);")
@@ -29,9 +31,11 @@ while True:
             time.sleep(2)
         except (NoSuchElementException, TimeoutException):
             break
+
 soup = BeautifulSoup(driver.page_source, 'html.parser')
 freelancers_data = []
 data = soup.find_all('div', {'class': 'up-card-section up-card-hover'})
+
 for freelancer in data:
     name = freelancer.find('div', {"class": "identity-name"}).text.strip()
     role = freelancer.find('p', {'class': 'my-0 freelancer-title'}).text.strip()
@@ -39,7 +43,7 @@ for freelancer in data:
     hourly_rate = freelancer.find('div', {'data-qa': 'rate'}).text.strip()
     earned_amount = freelancer.find('span', {'data-test': 'earned-amount-formatted'})
     total_earns = earned_amount.text.strip() if earned_amount else ""
-    job_success_score = freelancer.find('span', {'class': 'up-job-success-text'}).text.strip()\
+    job_success_score = freelancer.find('span', {'class': 'up-job-success-text'}).text.strip() \
         .replace('\n', '').replace('            ', '')
     badge = freelancer.find('span', {'class': 'status-text d-flex top-rated-badge-status'}).text.strip()
     bio = freelancer.find('div', {'class': 'up-line-clamp-v2 clamped'}).text.strip()
@@ -47,6 +51,7 @@ for freelancer in data:
     company_name = company_name_elem.text.strip() if company_name_elem else ""
     company_earn_elem = freelancer.find('div', {'class': 'ml-10 agency-box-stats'})
     company_earn = company_earn_elem.text.strip() if company_earn_elem else ""
+
     profile_links = soup.find_all('div', {'class': 'd-flex justify-space-between align-items-start'})
     split_data = str(profile_links).split()
     sliced_data = split_data[9:10]
@@ -54,6 +59,7 @@ for freelancer in data:
     final = split_sliced_data[1]
     final = final.replace('"', '')
     profile_link = 'https://www.upwork.com/freelancers/' + final
+
     company_links = soup.find_all(
         'div', {'class': 'cfe-ui-freelancer-tile-agency-box-legacy mt-5 mt-10 agency-box-legacy--link'})
     split_data = str(company_links).split(" ")
@@ -63,6 +69,7 @@ for freelancer in data:
     cleaned_data = sliced_split_sliced_data[0].strip('[]').strip('"')
     company_link = 'https://www.upwork.com/agencies/' + cleaned_data
     raw_htmls = freelancer.prettify()
+
     freelancer_data = {
         "Name": name,
         "Role": role,
@@ -78,15 +85,19 @@ for freelancer in data:
         "Raw_HTML": raw_htmls,
         "Company_Link": company_link
     }
+ 
     freelancers_data.append(freelancer_data)
 driver.quit()
+
 for freelancer_data in freelancers_data:
     print(freelancer_data)
 filename = 'freelancers_data20.csv'
+
 with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
     fieldnames = ['Name', 'Role', 'Country', 'Profile_Link', 'Hourly_Rate', 'Total_Earned', 'Job_Success_Score',
                   'Badge', 'Bio', 'Company_Name', 'Company_Earn', 'Raw_HTML', 'Company_Link']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
     writer.writerows(freelancers_data)
+
 print(f"Data saved to {filename}")
